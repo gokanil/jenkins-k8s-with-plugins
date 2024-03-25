@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-configuration
+data:
+  plugins.txt: |
+    html5-notifier-plugin
+    pipeline-stage-view
+    workflow-aggregator
+    cloudbees-folder
+    publish-over-ssh
+    script-security
+    docker-workflow
+    build-discarder
+    docker-plugin
+    gitlab-plugin
+    buildrotator
+    maven-plugin
+    workflow-cps
+    credentials
+    kubernetes
+    dotnet-sdk
+    ssh-steps
+    envinject
+    jdk-tool
+    sshd
+    git

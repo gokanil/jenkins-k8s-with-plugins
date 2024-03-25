@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1548Mi
+          env:
+            - name: JAVA_OPTS
+              value: -Djenkins.install.runSetupWizard=false
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: "/var/jenkins_home"
+            - name: plugin-volume
+              mountPath: /plugins/
+      initContainers:
+        - name: jenkins-init
+          image: jenkins/jenkins:lts
+          env:
+            - name: JAVA_OPTS
+              value: -Djenkins.install.runSetupWizard=false
+            - name: JENKINS_LIFECYCLE
+              value: SHUTDOWN
+            - name: JENKINS_HOME
+              value: ""
+          command:
+          - "/bin/bash"
+          - "-c"
+          - |
+           java -jar /usr/share/jenkins/jenkins.war --no-daemon --no-init;
+           jenkins-plugin-cli -f /plugins/plugins.txt -d /var/jenkins_home/plugins --verbose;
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: "/var/jenkins_home"
+            - name: plugin-volume
+              mountPath: /plugins/
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-persistentvolumeclaim
+        - name: plugin-volume
+          configMap:
+            name: jenkins-configuration
